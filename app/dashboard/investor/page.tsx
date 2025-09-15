@@ -340,12 +340,21 @@ export default function InvestorDashboard() {
                   </Typography>
                 )}
               </CardContent>
-              <CardActions sx={{ p: 2 }}>
+              <CardActions
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" }, // عمود بالموبايل، صف بالشاشات الكبيرة
+                  alignItems: { xs: "stretch", sm: "center" },
+                  gap: 1, // مسافة بين الأزرار
+                  p: 2,
+                }}
+              >
                 <Button
                   variant="outlined"
                   sx={{
                     borderColor: theme.palette.primary.light,
                     color: theme.palette.primary.light,
+                    width: { xs: "100%", sm: "auto" }, // عرض كامل بالموبايل
                     "&:hover": {
                       backgroundColor: theme.palette.primary.light,
                       color: "#2b3b4b",
@@ -357,12 +366,13 @@ export default function InvestorDashboard() {
                     ? "إزالة من المفضلة"
                     : "إضافة للمفضلة"}
                 </Button>
+
                 <Button
                   variant="contained"
                   sx={{
                     backgroundColor: theme.customColors.accent,
+                    width: { xs: "100%", sm: "auto" },
                     "&:hover": { backgroundColor: "#2b3b4b" },
-                    marginRight: "5px",
                   }}
                   onClick={() => handleSupportClick(project._id, project.name)}
                 >
@@ -370,16 +380,17 @@ export default function InvestorDashboard() {
                     ? "إلغاء اللقاء"
                     : "جدولة لقاء"}
                 </Button>
+
                 <Button
                   variant="outlined"
                   sx={{
                     borderColor: theme.customColors.accent,
                     color: theme.customColors.accent,
+                    width: { xs: "100%", sm: "auto" },
                     "&:hover": {
                       backgroundColor: theme.customColors.accent,
                       color: "#fff",
                     },
-                    marginRight: "5px",
                   }}
                   onClick={() => {
                     setSelectedProjectAnswers(project.criteriaAnswers || []);

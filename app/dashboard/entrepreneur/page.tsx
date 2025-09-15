@@ -317,14 +317,13 @@ export default function EntrepreneurDashboard() {
                   background: `linear-gradient(135deg, ${theme.customColors.card}, ${theme.customColors.accent})`,
                   color: theme.palette.text.primary,
                   borderRadius: 3,
-                  height: "300px",
+                  height: "auto", // خليها auto بدل 300px ليتكيف مع المحتوى
                   display: "flex",
                   flexDirection: "column",
                 })}
               >
                 <CardContent
                   sx={{
-                    height: "200px",
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
@@ -334,16 +333,19 @@ export default function EntrepreneurDashboard() {
                     <Typography variant="h6" fontWeight="bold">
                       {project.name}
                     </Typography>
-                    <hr style={{ marginLeft: "10px" }}></hr>
+                    <hr style={{ marginLeft: "10px" }} />
+
                     <Typography>
                       التقييم :{" "}
                       <span style={{ fontWeight: "bold", color: "gold" }}>
                         {project.evaluationScore}
                       </span>
                     </Typography>
+
                     <Typography color="primary.main">
                       نوع المشروع : {project.type}
                     </Typography>
+
                     {project.status && (
                       <Box
                         sx={{
@@ -356,10 +358,10 @@ export default function EntrepreneurDashboard() {
                           fontWeight: "bold",
                           backgroundColor:
                             project.status === "pending_review"
-                              ? "#ffa726" // برتقالي - قيد المراجعة
+                              ? "#ffa726"
                               : project.status === "disabled"
-                              ? "#ef5350" // أحمر - مرفوض
-                              : "#66bb6a", // أخضر - مقبول
+                              ? "#ef5350"
+                              : "#66bb6a",
                           color: "white",
                         }}
                       >
@@ -370,6 +372,7 @@ export default function EntrepreneurDashboard() {
                           : "مقبول"}
                       </Box>
                     )}
+
                     {project.status === "disabled" && (
                       <Button
                         size="small"
@@ -389,18 +392,31 @@ export default function EntrepreneurDashboard() {
                         استفسر
                       </Button>
                     )}
-                    <br></br>
-                    <Typography>score:{project.evaluationScore}</Typography>
+
+                    <Typography sx={{ mt: 1 }}>
+                      score:{project.evaluationScore}
+                    </Typography>
+
                     <Box sx={{ mt: 1, maxHeight: "80px", overflow: "auto" }}>
                       <Typography>{project.description}</Typography>
                     </Box>
+
+                    <Box sx={{ mt: 1 }}>
+                      <Typography mt={2} fontWeight="bold" color="gold">
+                        الميزانية: {project.budget} $
+                      </Typography>
+                    </Box>
                   </Box>
-                  <Typography mt={2} fontWeight="bold" color="gold">
-                    الميزانية: {project.budget} $
-                  </Typography>
                 </CardContent>
+
                 <CardActions
-                  sx={{ justifyContent: "start", px: 2, mt: "40px", gap: 2 }}
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" }, // عمود بالموبايل وصف بالشاشات الكبيرة
+                    alignItems: { xs: "stretch", sm: "center" },
+                    gap: 1,
+                    p: 2,
+                  }}
                 >
                   <Button
                     dir="rtl"
@@ -408,14 +424,21 @@ export default function EntrepreneurDashboard() {
                     color="primary"
                     endIcon={<EditIcon sx={{ marginRight: "5px" }} />}
                     onClick={() => handleEditClick(project)}
+                    sx={{
+                      width: { xs: "100%", sm: "auto" }, // عرض كامل بالموبايل فقط
+                    }}
                   >
                     تعديل
                   </Button>
+
                   <Button
                     variant="outlined"
                     color="error"
                     endIcon={<DeleteIcon sx={{ marginRight: "5px" }} />}
                     onClick={() => handleDeleteClick(project._id)}
+                    sx={{
+                      width: { xs: "100%", sm: "auto" },
+                    }}
                   >
                     حذف
                   </Button>
