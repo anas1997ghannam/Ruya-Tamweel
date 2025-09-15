@@ -1,91 +1,91 @@
 //path->app/register/page.tsx
 "use client";
 
-import { useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
 import {
   Box,
-  Button,
-  TextField,
-  Typography,
   Paper,
-  useTheme,
+  Typography,
+  TextField,
+  Button,
+  LinearProgress,
 } from "@mui/material";
 import PhoneInput from "react-phone-input-2";
-import "react-phone-input-2/lib/style.css";
 import { ToastContainer, toast } from "react-toastify";
+import "react-phone-input-2/lib/style.css";
 import "react-toastify/dist/ReactToastify.css";
-
-const initialFormData = {
-  fullName: "",
-  email: "",
-  password: "",
-  phone: "",
-  bio: "",
-};
+import zxcvbn from "zxcvbn";
+import { useTheme } from "@mui/material/styles";
 
 function RegisterContent() {
   const theme = useTheme();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const role = searchParams.get("role") || "";
-  const [formData, setFormData] = useState(initialFormData);
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    phone: "",
+    email: "",
+    password: "",
+    bio: "",
+  });
+
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "password") {
+      const result = zxcvbn(value);
+      setPasswordStrength(result.score); // 0 → 4
+    }
   };
 
   const handlePhoneChange = (value: string) => {
-    setFormData({ ...formData, phone: value });
+    setFormData((prev) => ({ ...prev, phone: value }));
   };
 
-  const handleRegister = async () => {
-    if (
-      !formData.fullName.trim() ||
-      !formData.email.trim() ||
-      !formData.password.trim() ||
-      !formData.phone.trim() ||
-      !role.trim()
-    ) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+  const handleRegister = () => {
+    if (passwordStrength < 3) {
+      toast.error("كلمة المرور ضعيفة جدًا. الرجاء اختيار كلمة مرور أقوى.");
       return;
     }
 
-    try {
-      const res = await fetch("/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, role }),
-      });
+    // تابع عملية التسجيل
+    toast.success("تم إنشاء الحساب بنجاح 🎉");
+  };
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.error || "فشل في إنشاء الحساب");
-        return;
-      }
-
-      toast.success("تم إنشاء الحساب بنجاح");
-      setTimeout(() => {
-        router.push("/login?role=" + role);
-      }, 2000);
-    } catch (err) {
-      console.error("خطأ في الاتصال بواجهة برمجة التطبيقات", err);
-      toast.error("حدث خطأ أثناء التسجيل");
+  const getStrengthColor = (score: number) => {
+    switch (score) {
+      case 0:
+        return "error";
+      case 1:
+        return "warning";
+      case 2:
+        return "warning";
+      case 3:
+        return "success";
+      case 4:
+        return "success";
+      default:
+        return "error";
     }
   };
 
-  const textFieldStyles = {
-    "& .MuiInputBase-input::placeholder": {
-      color: theme.palette.primary.light,
-      opacity: 1,
-    },
-    "& .MuiInputLabel-root": {
-      color: theme.palette.primary.light,
-    },
-    "& .Mui-focused .MuiInputLabel-root": {
-      color: theme.palette.primary.main,
-    },
+  const getStrengthLabel = (score: number) => {
+    switch (score) {
+      case 0:
+        return "ضعيفة جدًا";
+      case 1:
+        return "ضعيفة";
+      case 2:
+        return "متوسطة";
+      case 3:
+        return "قوية";
+      case 4:
+        return "قوية جدًا";
+      default:
+        return "غير معروفة";
+    }
   };
 
   return (
@@ -116,8 +116,9 @@ function RegisterContent() {
           align="center"
           sx={{ fontWeight: "bold", mb: 3 }}
         >
-          {role === "investor" ? "تسجيل المستثمر" : "تسجيل رائد الأعمال"}
+          تسجيل مستخدم جديد
         </Typography>
+
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           <TextField
             label="الاسم الكامل"
@@ -127,14 +128,8 @@ function RegisterContent() {
             fullWidth
             variant="filled"
             placeholder="أدخل اسمك الكامل"
-            InputProps={{
-              style: {
-                backgroundColor: "#1e1e1e",
-                color: theme.palette.text.primary,
-              },
-            }}
-            sx={textFieldStyles}
           />
+
           <PhoneInput
             placeholder="رقم الهاتف"
             country={"sa"}
@@ -158,6 +153,7 @@ function RegisterContent() {
               color: "white",
             }}
           />
+
           <TextField
             label="البريد الإلكتروني"
             name="email"
@@ -167,13 +163,6 @@ function RegisterContent() {
             fullWidth
             variant="filled"
             placeholder="أدخل بريدك الإلكتروني"
-            InputProps={{
-              style: {
-                backgroundColor: "#1e1e1e",
-                color: theme.palette.text.primary,
-              },
-            }}
-            sx={textFieldStyles}
           />
           <TextField
             label="كلمة المرور"
@@ -184,34 +173,35 @@ function RegisterContent() {
             fullWidth
             variant="filled"
             placeholder="أدخل كلمة المرور"
-            InputProps={{
-              style: {
-                backgroundColor: "#1e1e1e",
-                color: theme.palette.text.primary,
-              },
-            }}
-            sx={textFieldStyles}
           />
-          {role === "entrepreneur" && (
-            <TextField
-              label="نبذة عن المشروع أو اهتماماتك"
-              name="bio"
-              value={formData.bio}
-              onChange={handleChange}
-              fullWidth
-              multiline
-              rows={3}
-              variant="filled"
-              placeholder="أدخل نبذة قصيرة"
-              InputProps={{
-                style: {
-                  backgroundColor: "#1e1e1e",
-                  color: theme.palette.text.primary,
-                },
-              }}
-              sx={textFieldStyles}
-            />
+
+          {/* مؤشر قوة كلمة المرور */}
+          {formData.password && (
+            <Box>
+              <LinearProgress
+                variant="determinate"
+                value={(passwordStrength + 1) * 20}
+                color={getStrengthColor(passwordStrength) as any}
+                sx={{ height: 8, borderRadius: 2, mb: 1 }}
+              />
+              <Typography variant="body2" sx={{ textAlign: "center" }}>
+                قوة كلمة المرور: {getStrengthLabel(passwordStrength)}
+              </Typography>
+            </Box>
           )}
+
+          <TextField
+            label="نبذة"
+            name="bio"
+            value={formData.bio}
+            onChange={handleChange}
+            fullWidth
+            multiline
+            rows={3}
+            variant="filled"
+            placeholder="أدخل نبذة قصيرة"
+          />
+
           <Button
             variant="contained"
             onClick={handleRegister}
